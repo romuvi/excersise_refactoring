@@ -21,45 +21,59 @@ namespace RefactoringSample1
 			return _name;
 		}
 
-		public string Statement()
+		public double GetTotalCharge()
 		{
-			double totalAmount = 0;
-			int frequentRenterPoints = 0;
-			var result = $"Rental Record for {GetName()}\n";
+			double result = 0;
 
 			foreach (Rental rental in _rentals)
 			{
-				double thisAmount = 0;
-				//determine amounts for each line
-				switch (rental.GetMovie().GetPriceCode())
-				{
-					case Movie.REGULAR:
-						thisAmount += 2;
-						if (rental.GetDaysRented() > 2)
-							thisAmount += (rental.GetDaysRented() - 2) * 1.5;
-						break;
-					case Movie.NEW_RELEASE:
-						thisAmount += rental.GetDaysRented() * 3;
-						break;
-					case Movie.CHILDRENS:
-						thisAmount += 1.5;
-						if (rental.GetDaysRented() > 3)
-							thisAmount += (rental.GetDaysRented() - 3) * 1.5;
-						break;
-				}
-				// add frequent renter points
-				frequentRenterPoints++;
-				// add bonus for a two day new release rental
-				if ((rental.GetMovie().GetPriceCode() == Movie.NEW_RELEASE) &&	rental.GetDaysRented() > 1)
-					frequentRenterPoints++;
+				result += Rental.GetCharge(rental);
+			}
+
+			return result;
+		}
+
+		public int GetFrequentPoints()
+		{
+			int result = 0;
+
+			foreach (Rental rental in _rentals)
+			{
+				result += Rental.GetFrequentPoints(rental);
+			}
+
+			return result;
+		}
+
+		public string Statement()
+		{
+			var result = $"Rental Record for {GetName()}\n";
+
+			foreach (Rental rental in _rentals) 
+			{ 
 				//show figures for this rental
-				result += $"\t{rental.GetMovie().GetTitle()}\t{thisAmount}\n";
-				totalAmount += thisAmount;
+				result += $"\t{rental.GetMovie().GetTitle()}\t{Rental.GetCharge(rental)}\n";
+            }
+
+            //add footer lines
+            result += $"Amount owed is {GetTotalCharge()}\n";
+			result += $"You earned {GetFrequentPoints()} frequent renter points";
+			return result;
+		}
+
+		public string HtmlStatement()
+		{
+			var result = $"<h1>Rental Record for {GetName()}</h1>";
+
+			foreach (Rental rental in _rentals)
+			{
+				//show figures for this rental
+				result += $"<p>{rental.GetMovie().GetTitle()}\t{Rental.GetCharge(rental)}</p>";
 			}
 
 			//add footer lines
-			result += $"Amount owed is {totalAmount}\n";
-			result += $"You earned {frequentRenterPoints} frequent renter points";
+			result += $"<p>Amount owed is {GetTotalCharge()}</p>";
+			result += $"<p>ou earned {GetFrequentPoints()} frequent renter points</p>";
 			return result;
 		}
 	}
